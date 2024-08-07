@@ -1,9 +1,16 @@
 # EXPENSES PROJECT
 # Goal: create in depth visualization for expenses data
 #       include:
-#           monthly data
-#           expenditure by category (yearly and monthly)
-#           high low categories by month
+#           SUMMARY
+#               bar chart with monthly total exp
+#               pie chart with yearly exp categories, highlight on top 3
+#               line chart for each category's monthly data (grocery, dining, shopping, pet, etc.)
+#               averages for each cateogory over the year
+#           MONTHLY
+#               exp data
+#               expenditure by category
+#               high low categories
+#               this month compared to the previous month and compared to the average
 # Skills to practice:
 #       xlsx file read in
 #       data extraction on xlsx files
@@ -24,17 +31,17 @@
 
 # BREAKDOWN:
 
-### READ IN FILE
-### IMPORT DATA FROM WS TO DF
+### DONE READ IN FILE
+### DONE IMPORT DATA FROM WS TO DF
 # for ws in wb:
 #   store data into df using min/max row/col
-### CLEAN DATA USING PANDAS
+### TODO CLEAN DATA USING PANDAS -> DATA_CLEANER_MODULE.PY
 # create a module to clean data using pandas (this would be a seperate .py file)
-### FORMAT DATA FOR CHARTS
+### TODO FORMAT DATA FOR CHARTS -> DATA_FORMATTER_MODULE.PY
 # find what data format is needed for each type of chart
 # create functions for each type of chart that will format df data
-### DRAW/SAVE CHARTS
-### EXPORT NEW FILE WITH VISUALIZATIONS
+### TODO DRAW/SAVE CHARTS -> DATA_VISUALIZER_MODULE.PY
+### DONE EXPORT NEW FILE WITH VISUALIZATIONS
 
 # NOTE*** LATER IMPROVEMENTS
 # currently the plan is to store data from file into pandas df (to practice pandas).
@@ -52,6 +59,7 @@
 # MODULES
 import pandas as pd
 import os
+from openpyxl import Workbook, load_workbook
 
 class Expense_Visualization():
 
@@ -61,7 +69,7 @@ class Expense_Visualization():
         self.export_file = export_file
         self.wb = None 
 
-    def main():
+    def main(self):
         '''Main function:
             Reads in file
             Imports data from worksheet to dataframe
@@ -69,6 +77,18 @@ class Expense_Visualization():
             Format data for charts
             Draw and save chart in new file
             Export new file with visualizations'''
+        
+        df = self.file_import(data_type='expenses')
+        self.wb = self.create_wb()
+
+        # for loop to create worksheets in new wb based on key in df
+        for worksheet, dataframe in df:
+            self.create_ws(worksheet)
+            #append dataframe to cell
+
+
+        
+        
         
         
         
@@ -78,6 +98,8 @@ class Expense_Visualization():
         Dataframes stored in dictionary {worksheet:dataframe}.
         data_type parameter defaulted to import all data in worksheet(s),
         however can import only 'fixed' and only 'expense' data as well.
+        
+        Returns 
         '''
         # TODO do not import template ws
         # TODO fix fixed expenses, set amount of rows
@@ -134,6 +156,26 @@ class Expense_Visualization():
         #                         )
         #     return expense_df
 
+    def file_export(self):
+        '''Saves into export file as xlsx'''
+        self.wb.save(self.export_file)
+
+    def create_wb(self):
+        '''Creates a new workbook'''
+        wb = Workbook()
+
+        # retitle default sheet to Summary
+        default_ws = wb['Sheet']
+        default_ws.title = 'Summary'
+        
+        return wb
+    
+    def create_ws(self, ws_name):
+        '''Creates a new worksheet where ws_name is the name of the worksheet'''
+        ws = self.wb.create_sheet(ws_name)
+        return ws
+
+    
         
 
 
@@ -142,5 +184,5 @@ class Expense_Visualization():
 if __name__ == '__main__':
     filepath = os.path.join('C:','Users','miche','OneDrive','Documents','CodingwDad','Expense Analytics','Expenses_Data','EXPENSES_CHROMA.xlsx')
     save_file = os.path.join('Expense Analytics', 'Expense_Summary.xlsx')
-    Expense_Visualization(filepath, save_file).main()
+    Expense_Visualization(import_file=filepath, export_file=save_file).main()
 

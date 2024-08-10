@@ -58,6 +58,7 @@
 
 # MODULES
 import pandas as pd
+from pandas import DataFrame
 import os
 from openpyxl import Workbook, load_workbook
 
@@ -78,21 +79,26 @@ class Expense_Visualization():
             Draw and save chart in new file
             Export new file with visualizations'''
         
-        df = self.file_import(data_type='expenses')
+        dict_df = self.file_import(data_type='expenses')
         self.wb = self.create_wb()
 
         # for loop to create worksheets in new wb based on key in df
-        for worksheet, dataframe in df:
-            self.create_ws(worksheet)
+        for worksheet, dataframe in dict_df.items():
+            ws = self.create_ws(worksheet) # creates new worksheet
+            ws.append(list(dataframe.columns)) # appends column headers to first available cells
+            
+            for row in dataframe.itertuples(index=False, name=None):
+                ws.append(row)
+
+            
             #append dataframe to cell
 
-
+        # NOTE when working on each sheet, need to designate active ws
+        # does create_ws automatically set the new ws to active?
+        # is it better to use active.ws when needed or automatically set new ws in create_Sheet to the active one?
         
         
-        
-        
-        
-    def file_import(self, data_type='all'):
+    def file_import(self, data_type:str='all') -> dict[str, DataFrame]:
         '''
         Imports all worksheets to dataframes.
         Dataframes stored in dictionary {worksheet:dataframe}.
@@ -128,39 +134,12 @@ class Expense_Visualization():
         parameters = import_parameters.get(data_type, {})
 
         return pd.read_excel(io=self.import_file, sheet_name=None, **parameters)
-    
-        # if data_type == 'all':
-        #     all_df = pd.read_excel(io=self.import_file,
-        #                         sheet_name=None,
-        #                         )
-        #     return all_df
-        
-        # if data_type == 'fixed':
-        #     fixed_df = pd.read_excel(io=self.import_file,
-        #                         sheet_name=None,
-        #                         header=None,
-        #                         names=['Fixed Expense','Type','Amount'],
-        #                         usecols='A:C',
-        #                         skiprows=5,
-        #                         skipfooter=18, # ERROR HERE
-        #                         )
-        #     return fixed_df
-        
-        # if data_type == 'expense':
-        #     expense_df = pd.read_excel(io=self.import_file,
-        #                         sheet_name=None,
-        #                         header=None,
-        #                         names=['Expenditure','Category','Amount'],
-        #                         usecols='A:C',
-        #                         skiprows=20,
-        #                         )
-        #     return expense_df
 
-    def file_export(self):
+    def file_export(self) -> None:
         '''Saves into export file as xlsx'''
         self.wb.save(self.export_file)
 
-    def create_wb(self):
+    def create_wb(self) -> Workbook:
         '''Creates a new workbook'''
         wb = Workbook()
 
@@ -170,10 +149,9 @@ class Expense_Visualization():
         
         return wb
     
-    def create_ws(self, ws_name):
+    def create_ws(self, ws_name:str):
         '''Creates a new worksheet where ws_name is the name of the worksheet'''
-        ws = self.wb.create_sheet(ws_name)
-        return ws
+        return self.wb.create_sheet(ws_name) 
 
     
         
@@ -182,7 +160,28 @@ class Expense_Visualization():
 
 # if Expense_Visuatlization is run on original py file, use specified filepath and save_file
 if __name__ == '__main__':
-    filepath = os.path.join('C:','Users','miche','OneDrive','Documents','CodingwDad','Expense Analytics','Expenses_Data','EXPENSES_CHROMA.xlsx')
-    save_file = os.path.join('Expense Analytics', 'Expense_Summary.xlsx')
+    filepath = os.path.join('C:\\','Users','miche','OneDrive','Documents','CodingwDad','Expense_Analytics','Expense_Data','EXPENSES_CHROMA.xlsx')
+    save_file = os.path.join('Expense_Analytics', 'Expense_Summary.xlsx')
     Expense_Visualization(import_file=filepath, export_file=save_file).main()
+
+
+
+#  def foobar(self, foo:str = 'FOO') -> str:
+#         return foo + '_bar'
+    
+#     def foobar_old(self, foo='FOO'):
+#         return foo + '_bar'
+
+#     def foobar_general(self, foo, bar):
+#         return foo + bar
+        
+#     def more_stuff(self, x:str, y:str) -> bool:
+#         return x == y
+    
+
+#     # forbar()
+    
+#     # char * foobar(char* foo, char* bar):
+
+#     more_stuff(foobar('xyz'), foobar(1), 'aaa')\
 

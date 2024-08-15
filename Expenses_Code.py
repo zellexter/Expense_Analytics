@@ -35,7 +35,7 @@
 ### DONE IMPORT DATA FROM WS TO DF
 # for ws in wb:
 #   store data into df using min/max row/col
-### TODO CLEAN DATA USING PANDAS -> DATA_CLEANER_MODULE.PY
+### DONE CLEAN DATA USING PANDAS -> DATA_CLEANER_MODULE.PY
 # create a module to clean data using pandas (this would be a seperate .py file)
 ### TODO FORMAT DATA FOR CHARTS -> DATA_FORMATTER_MODULE.PY
 # find what data format is needed for each type of chart
@@ -61,6 +61,8 @@ import pandas as pd
 from pandas import DataFrame
 import os
 from openpyxl import Workbook, load_workbook
+from Data_Cleaner_Module import convert_float, convert_str, capitalize
+from Data_Formatter_Module import format_piechart
 
 class Expense_Visualization():
 
@@ -73,30 +75,46 @@ class Expense_Visualization():
     def main(self):
         '''Main function:
             Reads in file
-            Imports data from worksheet to dataframe
-            Cleans data using DataCleaner Module
+            Imports data from worksheet to dataframes
+            Cleans data in dataframe using DataCleaner Module
             Format data for charts
             Draw and save chart in new file
             Export new file with visualizations'''
         
-        dict_df = self.file_import(data_type='expenses')
+        dict_df = self.file_import(data_type='expenses') # {worksheet:df}
         self.wb = self.create_wb()
+        dict_df_totals = {worksheet:dataframe.groupby('Category')['Amount'].sum().reset_index() for worksheet, dataframe in dict_df.items()} # {worksheet:df}
 
-        # for loop to create worksheets in new wb based on key in df
+        ### CLEANS DATA
+        for df in dict_df.values(): # each worksheet's dataframe
+            df['Amount'] = df['Amount'].apply(convert_float)
+            df['Expenditure'] = df['Expenditure'].apply(convert_str)
+            df['Expenditure'] = df['Expenditure'].apply(capitalize)
+            
+
+        ### CREATE WS AND APPEND DATA (expenses and totals)
+        # TODO improvement to append category totals to new column instead of directly below expenses df
         for worksheet, dataframe in dict_df.items():
             ws = self.create_ws(worksheet) # creates new worksheet
             ws.append(list(dataframe.columns)) # appends column headers to first available cells
+            self.append_rows(ws, dataframe) # appends dataframe
+            category_totals = dataframe.groupby('Category')['Amount'].sum().reset_index() # creates new df with category totals
+            self.append_rows(ws, category_totals) # appends category totals to ws
+
+        ### CREATE PIE CHART OF T CATEGORY EXPENSES FOR EACH WORKSHEET
+        for worksheet, dataframe in dict_df_totals.items():
+            format_piechart(['Expense Category','Amount'], dataframe)
+            # NOTE format_piechart can be a function embedded in the draw_piechart() function
             
-            for row in dataframe.itertuples(index=False, name=None):
-                ws.append(row)
+
+        self.file_export()
 
             
-            #append dataframe to cell
 
-        # NOTE when working on each sheet, need to designate active ws
-        # does create_ws automatically set the new ws to active?
-        # is it better to use active.ws when needed or automatically set new ws in create_Sheet to the active one?
-        
+    def append_rows(self, ws, df:DataFrame):
+        '''Iterates through rows in df and appends to ws'''
+        for row in df.itertuples(index=False, name=None):
+            ws.append(row)
         
     def file_import(self, data_type:str='all') -> dict[str, DataFrame]:
         '''
@@ -160,8 +178,8 @@ class Expense_Visualization():
 
 # if Expense_Visuatlization is run on original py file, use specified filepath and save_file
 if __name__ == '__main__':
-    filepath = os.path.join('C:\\','Users','miche','OneDrive','Documents','CodingwDad','Expense_Analytics','Expense_Data','EXPENSES_CHROMA.xlsx')
-    save_file = os.path.join('Expense_Analytics', 'Expense_Summary.xlsx')
+    filepath = os.path.join('C:\\','Users','miche','OneDrive','Documents','CodingwDad','Expense_Analytics','Expense_Data','EXPENSES_CHROMA (3).xlsx')
+    save_file = os.path.join('C:\\','Users','miche','OneDrive','Documents','CodingwDad','Expense_Analytics', 'Expense_Summary.xlsx')
     Expense_Visualization(import_file=filepath, export_file=save_file).main()
 
 

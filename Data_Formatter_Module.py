@@ -21,9 +21,6 @@ def format_piechart(header:list, dict_df:dict) -> list:
     return data
 
 
-
-
-
 ### NOTE attempt this summary line chart later
 # for worksheet, dataframe in dict_df.items():
 # format_linechart(header=['Month','Groceries','Dining','Shopping','Pet','Car','Misc','Event','Snacks'])

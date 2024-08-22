@@ -23,7 +23,7 @@ def capitalize(s:str) -> str:
         if next_is_start and c.isalpha():
             new_c = c.upper()
         else:
-            new_c = c
+            new_c = c.lower()
 
         result.append(new_c)
 

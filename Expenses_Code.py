@@ -31,17 +31,17 @@
 
 # BREAKDOWN:
 
-### DONE READ IN FILE
-### DONE IMPORT DATA FROM WS TO DF
+# DONE READ IN FILE
+# DONE IMPORT DATA FROM WS TO DF
 # for ws in wb:
 #   store data into df using min/max row/col
-### DONE CLEAN DATA USING PANDAS -> DATA_CLEANER_MODULE.PY
+# DONE CLEAN DATA USING PANDAS -> DATA_CLEANER_MODULE.PY
 # create a module to clean data using pandas (this would be a seperate .py file)
-### TODO FORMAT DATA FOR CHARTS -> DATA_FORMATTER_MODULE.PY
+# TODO FORMAT DATA FOR CHARTS -> DATA_FORMATTER_MODULE.PY
 # find what data format is needed for each type of chart
 # create functions for each type of chart that will format df data
-### TODO DRAW/SAVE CHARTS -> DATA_VISUALIZER_MODULE.PY
-### DONE EXPORT NEW FILE WITH VISUALIZATIONS
+# TODO DRAW/SAVE CHARTS -> DATA_VISUALIZER_MODULE.PY
+# DONE EXPORT NEW FILE WITH VISUALIZATIONS
 
 # NOTE*** LATER IMPROVEMENTS
 # currently the plan is to store data from file into pandas df (to practice pandas).
@@ -64,13 +64,14 @@ from openpyxl import Workbook, load_workbook
 from Data_Cleaner_Module import convert_float, convert_str, capitalize
 from Data_Formatter_Module import format_piechart
 
+
 class Expense_Visualization():
 
     def __init__(self, import_file, export_file) -> None:
         '''Initializes import and export file, sets original workbook to None'''
         self.import_file = import_file
         self.export_file = export_file
-        self.wb = None 
+        self.wb = None
 
     def main(self):
         '''Main function:
@@ -80,49 +81,51 @@ class Expense_Visualization():
             Format data for charts
             Draw and save chart in new file
             Export new file with visualizations'''
-        
-        dict_df = self.file_import(data_type='expenses') # {worksheet:df}
-        self.wb = self.create_wb()
-        dict_df_totals = {worksheet:dataframe.groupby('Category')['Amount'].sum().reset_index() for worksheet, dataframe in dict_df.items()} # {worksheet:df}
 
-        ### CLEANS DATA
-        for df in dict_df.values(): # each worksheet's dataframe
+        dict_df = self.file_import(data_type='expenses')  # {worksheet:df}
+        self.wb = self.create_wb()
+        dict_df_totals = {worksheet: dataframe.groupby('Category')['Amount'].sum().reset_index()
+                          for worksheet, dataframe in dict_df.items()}  # {worksheet:df}
+
+        # CLEANS DATA
+        for df in dict_df.values():  # each worksheet's dataframe
             df['Amount'] = df['Amount'].apply(convert_float)
             df['Expenditure'] = df['Expenditure'].apply(convert_str)
             df['Expenditure'] = df['Expenditure'].apply(capitalize)
-            
 
-        ### CREATE WS AND APPEND DATA (expenses and totals)
+        # CREATE WS AND APPEND DATA (expenses and totals)
         # TODO improvement to append category totals to new column instead of directly below expenses df
+        # TODO is appenidng category_totals necessary when format_piechart will eventually do that? may be redundent, remove
         for worksheet, dataframe in dict_df.items():
-            ws = self.create_ws(worksheet) # creates new worksheet
-            ws.append(list(dataframe.columns)) # appends column headers to first available cells
-            self.append_rows(ws, dataframe) # appends dataframe
-            category_totals = dataframe.groupby('Category')['Amount'].sum().reset_index() # creates new df with category totals
-            self.append_rows(ws, category_totals) # appends category totals to ws
+            ws = self.create_ws(worksheet)  # creates new worksheet
+            # appends column headers to first available cells
+            ws.append(list(dataframe.columns))
+            # appends dataframe to ws
+            self.append_rows(ws, dataframe)
+            # creates new df with category totals
+            category_totals = dataframe.groupby('Category')['Amount'].sum().reset_index()
+            # appends category totals to ws
+            self.append_rows(ws, category_totals)
 
-        ### CREATE PIE CHART OF T CATEGORY EXPENSES FOR EACH WORKSHEET
+        # CREATE PIE CHART OF T CATEGORY EXPENSES FOR EACH WORKSHEET
         for worksheet, dataframe in dict_df_totals.items():
-            format_piechart(['Expense Category','Amount'], dataframe)
+            format_piechart(['Expense Category', 'Amount'], dataframe)
             # NOTE format_piechart can be a function embedded in the draw_piechart() function
-            
 
         self.file_export()
 
-            
-
-    def append_rows(self, ws, df:DataFrame):
+    def append_rows(self, ws, df: DataFrame):
         '''Iterates through rows in df and appends to ws'''
         for row in df.itertuples(index=False, name=None):
             ws.append(row)
-        
-    def file_import(self, data_type:str='all') -> dict[str, DataFrame]:
+
+    def file_import(self, data_type: str = 'all') -> dict[str, DataFrame]:
         '''
         Imports all worksheets to dataframes.
         Dataframes stored in dictionary {worksheet:dataframe}.
         data_type parameter defaulted to import all data in worksheet(s),
         however can import only 'fixed' and only 'expense' data as well.
-        
+
         Returns 
         '''
         # TODO do not import template ws
@@ -136,14 +139,14 @@ class Expense_Visualization():
             'all': {},
             'fixed': {
                 'header': None,
-                'names': ['Fixed Expense','Type','Amount'],
+                'names': ['Fixed Expense', 'Type', 'Amount'],
                 'usecols': 'A:C',
                 'skiprows': 5,
                 'skipfooter': 18
             },
             'expenses': {
                 'header': None,
-                'names': ['Expenditure','Category','Amount'],
+                'names': ['Expenditure', 'Category', 'Amount'],
                 'usecols': 'A:C',
                 'skiprows': 20
             }
@@ -164,42 +167,41 @@ class Expense_Visualization():
         # retitle default sheet to Summary
         default_ws = wb['Sheet']
         default_ws.title = 'Summary'
-        
+
         return wb
-    
-    def create_ws(self, ws_name:str):
+
+    def create_ws(self, ws_name: str):
         '''Creates a new worksheet where ws_name is the name of the worksheet'''
-        return self.wb.create_sheet(ws_name) 
-
-    
-        
-
+        return self.wb.create_sheet(ws_name)
 
 
 # if Expense_Visuatlization is run on original py file, use specified filepath and save_file
 if __name__ == '__main__':
-    filepath = os.path.join('C:\\','Users','miche','OneDrive','Documents','CodingwDad','Expense_Analytics','Expense_Data','EXPENSES_CHROMA (3).xlsx')
-    save_file = os.path.join('C:\\','Users','miche','OneDrive','Documents','CodingwDad','Expense_Analytics', 'Expense_Summary.xlsx')
+    filepath = os.path.join('C:\\', 'Users', 'miche', 'OneDrive', 'Documents',
+                            'CodingwDad', 'Expense_Analytics', 'Expense_Data', 'EXPENSES_CHROMA (3).xlsx')
+    save_file = os.path.join('C:\\', 'Users', 'miche', 'OneDrive', 'Documents',
+                             'CodingwDad', 'Expense_Analytics', 'Expense_Summary.xlsx')
     Expense_Visualization(import_file=filepath, export_file=save_file).main()
-
 
 
 #  def foobar(self, foo:str = 'FOO') -> str:
 #         return foo + '_bar'
-    
+
 #     def foobar_old(self, foo='FOO'):
 #         return foo + '_bar'
 
 #     def foobar_general(self, foo, bar):
 #         return foo + bar
-        
+
 #     def more_stuff(self, x:str, y:str) -> bool:
 #         return x == y
-    
+
 
 #     # forbar()
-    
+
 #     # char * foobar(char* foo, char* bar):
 
 #     more_stuff(foobar('xyz'), foobar(1), 'aaa')\
+
+# coverage term line python3 -m pytest --cov-report term --cov-report xml:coverage.xml --cov=.
 

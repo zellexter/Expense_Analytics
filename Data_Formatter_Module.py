@@ -14,10 +14,12 @@ import pandas as pd
 from pandas import DataFrame
 
 def format_piechart(header:list, dict_df:dict) -> list:
-    '''Formats data to be ready for draw chart function.
+    '''Formats data and appends to ws to be ready for draw chart function.
         header is a list containing [pie slice, value]
-        dict_df is where the data is extracted from'''
+        dict_df is where the data is extracted from.
+        '''
     data = [header] + [[row.Category, row.Amount] for row in dict_df.itertuples(index=False)]
+
     return data
 
 

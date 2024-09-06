@@ -11,6 +11,7 @@
 #               expenditure by category
 #               high low categories
 #               this month compared to the previous month and compared to the average
+#               Dining VS. Groceries
 # Skills to practice:
 #       xlsx file read in
 #       data extraction on xlsx files
@@ -62,7 +63,8 @@ from pandas import DataFrame
 import os
 from openpyxl import Workbook, load_workbook
 from Data_Cleaner_Module import convert_float, convert_str, capitalize
-from Data_Formatter_Module import format_piechart
+from Data_Formatter_Module import *
+from Data_Visualizer_Module import *
 
 
 class Expense_Visualization():
@@ -93,24 +95,29 @@ class Expense_Visualization():
             df['Expenditure'] = df['Expenditure'].apply(convert_str)
             df['Expenditure'] = df['Expenditure'].apply(capitalize)
 
-        # CREATE WS AND APPEND DATA (expenses and totals)
-        # TODO improvement to append category totals to new column instead of directly below expenses df
-        # TODO is appenidng category_totals necessary when format_piechart will eventually do that? may be redundent, remove
+        # CREATE WS AND APPEND DATA
         for worksheet, dataframe in dict_df.items():
-            ws = self.create_ws(worksheet)  # creates new worksheet
+            # creates new worksheet
+            ws = self.create_ws(worksheet)
             # appends column headers to first available cells
             ws.append(list(dataframe.columns))
             # appends dataframe to ws
             self.append_rows(ws, dataframe)
-            # creates new df with category totals
-            category_totals = dataframe.groupby('Category')['Amount'].sum().reset_index()
-            # appends category totals to ws
-            self.append_rows(ws, category_totals)
 
         # CREATE PIE CHART OF T CATEGORY EXPENSES FOR EACH WORKSHEET
-        for worksheet, dataframe in dict_df_totals.items():
-            format_piechart(['Expense Category', 'Amount'], dataframe)
-            # NOTE format_piechart can be a function embedded in the draw_piechart() function
+        # DONE format_piechart can be a function embedded in the draw_piechart() function
+        # DONE generalized start row/col variables to pass into function
+        # NOTE: reusing variables, maybe make a function so vars aren't global
+        for worksheet_title, dataframe in dict_df_totals.items():
+            header = ['Expense Category', 'Amount']
+            worksheet = self.wb[worksheet_title]
+
+            # appending reference data
+            start_row = 1 # start from first row
+            start_col = 4 # start from fourth column D
+
+            draw_piechart(worksheet_title, worksheet, header, dataframe, start_row, start_col)
+            
 
         self.file_export()
 

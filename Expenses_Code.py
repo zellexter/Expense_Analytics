@@ -8,7 +8,7 @@
 #               averages for each cateogory over the year
 #           MONTHLY
 #               exp data
-#               expenditure by category
+#               pie chart expenditure by category
 #               high low categories
 #               this month compared to the previous month and compared to the average
 #               Dining VS. Groceries
@@ -80,7 +80,6 @@ class Expense_Visualization():
             Reads in file
             Imports data from worksheet to dataframes
             Cleans data in dataframe using DataCleaner Module
-            Format data for charts
             Draw and save chart in new file
             Export new file with visualizations'''
 
@@ -104,10 +103,14 @@ class Expense_Visualization():
             # appends dataframe to ws
             self.append_rows(ws, dataframe)
 
-        # CREATE PIE CHART OF T CATEGORY EXPENSES FOR EACH WORKSHEET
-        # DONE format_piechart can be a function embedded in the draw_piechart() function
-        # DONE generalized start row/col variables to pass into function
-        # NOTE: reusing variables, maybe make a function so vars aren't global
+        # CREATE PIECHART FOR MONTHLY CATEGORY DATA
+        self.create_monthly_piechart(dict_df_totals)
+            
+
+        self.file_export()
+
+    def create_monthly_piechart(self, dict_df_totals):
+        '''Creates pie chart for each month's total expenses seperated by category'''
         for worksheet_title, dataframe in dict_df_totals.items():
             header = ['Expense Category', 'Amount']
             worksheet = self.wb[worksheet_title]
@@ -116,10 +119,12 @@ class Expense_Visualization():
             start_row = 1 # start from first row
             start_col = 4 # start from fourth column D
 
-            draw_piechart(worksheet_title, worksheet, header, dataframe, start_row, start_col)
-            
+            # title
+            title = f'{worksheet_title} Expenses by Category'
 
-        self.file_export()
+            draw_piechart(title, worksheet, header, dataframe, start_row, start_col, add_to='F2')
+
+    # TODO: def create_summary_piechart(self, 
 
     def append_rows(self, ws, df: DataFrame):
         '''Iterates through rows in df and appends to ws'''

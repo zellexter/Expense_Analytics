@@ -7,9 +7,19 @@ from openpyxl.chart import (
 from openpyxl.chart.series import DataPoint
 from openpyxl.worksheet.worksheet import Worksheet
 
-def draw_piechart(ws_title:str, worksheet: Worksheet, header:list, dict_df:dict, start_row:int, start_col:int):
-    '''Draws a piechart after formatting data from a given dataframe.
-    Only handles two columns of data currently.'''
+def draw_piechart(title: str, worksheet: Worksheet, header:list, dict_df:dict, start_row:int, start_col:int, add_to: str):
+    """
+    Draws a piechart after formatting data from a given dataframe.
+    Only handles two columns of data currently.
+
+    Args:
+        ws_title (str): Used to title the chart.
+        worksheet (Worksheet): Used to append data onto and add chart.
+        header (list): Used to add headers to data.
+        dict_df (dict): Used to extract data.
+        start_row (int): First row where data will be appended in worksheet.
+        start_col (int): First column where data will be appended in worksheet.
+    """
 
     # format data and store in reusable variable
     formatted_data = format_piechart(header=header, dict_df=dict_df)
@@ -28,9 +38,10 @@ def draw_piechart(ws_title:str, worksheet: Worksheet, header:list, dict_df:dict,
     # creating references for piechart
     pie.add_data(data, titles_from_data=True)
     pie.set_categories(labels)
-    pie.title = f'{ws_title} Total Expenditure by Category'
+    pie.title = title
 
-    worksheet.add_chart(pie, 'F2')
+
+    worksheet.add_chart(pie, add_to)
 
     ### ughhhhhh lesson learned, openpyxl's add_data() REQUIRES a reference() object. no way around it.
     ### ALSO: labels reference only references the actual labels, while in data reference you can include the header (min row 1)

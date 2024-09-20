@@ -105,6 +105,8 @@ class Expense_Visualization():
 
         # CREATE PIECHART FOR MONTHLY CATEGORY DATA
         self.create_monthly_piechart(dict_df_totals)
+        # CREATE SUMMARY PIECHART FOR YEARLY CATEGORY DATA
+        self.create_summary_piechart(dict_df_totals)
             
 
         self.file_export()
@@ -124,7 +126,32 @@ class Expense_Visualization():
 
             draw_piechart(title, worksheet, header, dataframe, start_row, start_col, add_to='F2')
 
-    # TODO: def create_summary_piechart(self, 
+    def create_summary_piechart(self, dict_df_totals):
+        '''Creates pie chart for summary of all categorical expenses'''
+        # data collection
+        yearly_totals = {}
+        for worksheet, dataframe in dict_df_totals.items():
+            for index, row in dataframe.iterrows():
+                category = row['Category']
+                amount = row['Amount']
+
+                if category in yearly_totals:
+                    yearly_totals[category] += amount
+                else:
+                    yearly_totals[category] = amount
+
+        # convert dict to df
+        df_yearly_totals = pd.DataFrame(list(yearly_totals.items()), columns=['Category', 'Amount'])
+
+        # draw chart
+        header = ['Expense Category', 'Amount']
+        worksheet = self.wb['Summary']
+        start_row = 1
+        start_col = 1
+        title = 'Yearly Expenses by Category'
+        draw_piechart(title, worksheet, header, df_yearly_totals, start_row, start_col, add_to='F2')
+        
+
 
     def append_rows(self, ws, df: DataFrame):
         '''Iterates through rows in df and appends to ws'''

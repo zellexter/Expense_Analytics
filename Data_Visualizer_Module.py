@@ -16,7 +16,7 @@ def draw_piechart(title: str, worksheet: Worksheet, header:list, dict_df:dict, s
         ws_title (str): Used to title the chart.
         worksheet (Worksheet): Used to append data onto and add chart.
         header (list): Used to add headers to data.
-        dict_df (dict): Used to extract data.
+        dict_df (dict): Used to extract data. Data must be stored in a dictionary.
         start_row (int): First row where data will be appended in worksheet.
         start_col (int): First column where data will be appended in worksheet.
     """

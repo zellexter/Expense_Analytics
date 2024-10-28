@@ -42,11 +42,13 @@
 # find what data format is needed for each type of chart
 # create functions for each type of chart that will format df data
 # TODO DRAW/SAVE CHARTS -> DATA_VISUALIZER_MODULE.PY
+# TODO use percentages for pie chart
 # DONE EXPORT NEW FILE WITH VISUALIZATIONS
 
 # NOTE*** LATER IMPROVEMENTS
 # currently the plan is to store data from file into pandas df (to practice pandas).
 #   future improvement may be to read and extract data directly from file into clean/format functions
+#   can also use closest match module to find how much spending for each expense (mcdonalds, ralphs, etc.)
 # BANK STATEMENTS---
 #   pass in pdfs of bank statements and read expense data from there
 #   need to learn:
